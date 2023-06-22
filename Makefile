@@ -5,7 +5,7 @@ LDPARAMS = -melf_i386
 objects = loader.o kernel.o
 
 %.o: %.cpp
-	gcc $(GCCPARAMS) -o $ -c -o $@ $<
+	gcc $(GCCPARAMS) -c -o $@ $<
 %.o: %.s
 	as $(ASPARAMS) -o $@ $<
 
