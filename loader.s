@@ -16,7 +16,7 @@ loader:
     mov $kernel_stack, %esp
 
     call callConstructors
-    
+
     push %eax
     push %ebx
     call kernelMain
@@ -28,4 +28,4 @@ _stop:
 
 .section .bss
 .space 2*1024*1024; # 2mb
-kernel_stack;
+kernel_stack:
