@@ -4,6 +4,8 @@ void printf(char* str);
 
 InterruptManger::GateDescriptor InterruptManger::interruptDescriptorTable[256];
 
+InterruptManger* InterruptManger::ActiveInterruptManager = 0;
+
 void InterruptManger::SetInterruptDescriptorTableEntry(
     uint8_t interruptNumber,
     uint16_t codeSegmentSelectorOffset,
@@ -60,10 +62,33 @@ InterruptManger::~InterruptManger(){}
 
 void InterruptManger::Activate()
 {
+    if(ActiveInterruptManager != 0)
+        ActiveInterruptManager->Deactivate();
+    ActiveInterruptManager = this;
     asm("sti");
 }
 
+void InterruptManger::Deactivate()
+{
+    if(ActiveInterruptManager == this)
+    {
+        ActiveInterruptManager = 0;
+        asm("cli");
+    }
+    
+}
+
 uint32_t InterruptManger::handleInterrupt(uint8_t interruptNumber, uint32_t esp)
+{
+    if(ActiveInterruptManager != 0)
+    {
+        return ActiveInterruptManager->DoHandleInterrupt(interruptNumber, esp);
+    }
+    printf(" INTERRUPT");
+    return esp;
+}
+
+uint32_t InterruptManger::DoHandleInterrupt(uint8_t interruptNumber, uint32_t esp)
 {
     printf(" INTERRUPT");
     return esp;
