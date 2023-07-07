@@ -2,17 +2,20 @@
 
 .section .text
 
-.extern _ZN15InterruptManger15handleInterruptEhj
+.extern _ZN15InterruptManger15HandleInterruptEhj
 
+.global _ZN15InterruptManger22IgnoreInterruptRequestEv
 
 .macro HandleException num
-.global _ZN15InterruptManger16handleException\num\()Ev
+.global _ZN15InterruptManger16HandleException\num\()Ev
+_ZN15InterruptManger16HandleException\num\()Ev:
     movb $\num, (interruptnumber)
     jmp int_bottom
 .endm
 
 .macro HandleInterruptRequest num
-.global _ZN15InterruptManger26handleInterruptRequest\num\()Ev
+.global _ZN15InterruptManger26HandleInterruptRequest\num\()Ev
+_ZN15InterruptManger26HandleInterruptRequest\num\()Ev:
     movb $\num + IRO_BASE, (interruptnumber)
     jmp int_bottom
 .endm
@@ -39,6 +42,8 @@ int_bottom:
     popl %es 
     popl %ds
     popa
+
+_ZN15InterruptManger22IgnoreInterruptRequestEv:
     
     iret
 

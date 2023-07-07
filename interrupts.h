@@ -20,6 +20,12 @@
 
         static GateDescriptor interruptDescriptorTable[256];
 
+        struct InterruptDescriptorTablePointer
+        {
+            uint16_t size;
+            uint32_t base;
+        } __attribute__((packed));
+
         static void SetInterruptDescriptorTableEntry(
             uint8_t interruptNumber,
             uint16_t codeSegmentSelectorOffset,
@@ -32,6 +38,8 @@
 
         InterruptManger(GlobalDescriptorTable* gdt);
         ~InterruptManger();
+
+        void Activate();
 
         static uint32_t handleInterrupt(uint8_t interruptNumber, uint32_t esp);
 
