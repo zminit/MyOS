@@ -19,11 +19,6 @@ uint32_t InterruptHandler::HandleInterrupt(uint32_t esp)
 }
 
 
-
-
-
-
-
 InterruptManager::GateDescriptor InterruptManager::interruptDescriptorTable[256];
 
 InterruptManager* InterruptManager::ActiveInterruptManager = 0;
