@@ -2,11 +2,33 @@
 
 void printf(char* str);
 
-InterruptManger::GateDescriptor InterruptManger::interruptDescriptorTable[256];
+InterruptHandler::InterruptHandler(uint8_t interruptNumber, InterruptManager* interruptManager)
+{
+    this->interrruptNumber = interruptNumber;
+    this->interruptManager = interruptManager;
+    interruptManager->handlers[interrruptNumber] = this;
+}
+InterruptHandler::~InterruptHandler()
+{
+    if(interruptManager->handlers[interrruptNumber] == this)
+        interruptManager->handlers[interrruptNumber] = 0;
+}
+uint32_t InterruptHandler::HandleInterrupt(uint32_t esp)
+{
+    return esp;
+}
 
-InterruptManger* InterruptManger::ActiveInterruptManager = 0;
 
-void InterruptManger::SetInterruptDescriptorTableEntry(
+
+
+
+
+
+InterruptManager::GateDescriptor InterruptManager::interruptDescriptorTable[256];
+
+InterruptManager* InterruptManager::ActiveInterruptManager = 0;
+
+void InterruptManager::SetInterruptDescriptorTableEntry(
     uint8_t interruptNumber,
     uint16_t codeSegmentSelectorOffset,
     void(*handler)(),
@@ -22,7 +44,7 @@ void InterruptManger::SetInterruptDescriptorTableEntry(
     interruptDescriptorTable[interruptNumber].reserved = 0; 
 }
 
-InterruptManger::InterruptManger(GlobalDescriptorTable* gdt)
+InterruptManager::InterruptManager(GlobalDescriptorTable* gdt)
 : picMasterCommand(0x20),
   picMasterData(0x21),
   picSlaveCommand(0xA0),
@@ -32,7 +54,11 @@ InterruptManger::InterruptManger(GlobalDescriptorTable* gdt)
     const uint8_t IDT_INTERRUPT_GATE = 0xE;
 
     for(uint16_t i = 0; i < 256; i++)
+    {
+        handlers[i] = 0;
         SetInterruptDescriptorTableEntry(i, CodeSegment, &IgnoreInterruptRequest, 0, IDT_INTERRUPT_GATE);
+    }
+        
 
     SetInterruptDescriptorTableEntry(0x20, CodeSegment, &HandleInterruptRequest0x00, 0, IDT_INTERRUPT_GATE);
     SetInterruptDescriptorTableEntry(0x21, CodeSegment, &HandleInterruptRequest0x01, 0, IDT_INTERRUPT_GATE);
@@ -58,9 +84,9 @@ InterruptManger::InterruptManger(GlobalDescriptorTable* gdt)
     asm volatile("lidt %0": :"m"(idt));
 }
 
-InterruptManger::~InterruptManger(){}
+InterruptManager::~InterruptManager(){}
 
-void InterruptManger::Activate()
+void InterruptManager::Activate()
 {
     if(ActiveInterruptManager != 0)
         ActiveInterruptManager->Deactivate();
@@ -68,7 +94,7 @@ void InterruptManger::Activate()
     asm("sti");
 }
 
-void InterruptManger::Deactivate()
+void InterruptManager::Deactivate()
 {
     if(ActiveInterruptManager == this)
     {
@@ -78,7 +104,7 @@ void InterruptManger::Deactivate()
     
 }
 
-uint32_t InterruptManger::handleInterrupt(uint8_t interruptNumber, uint32_t esp)
+uint32_t InterruptManager::handleInterrupt(uint8_t interruptNumber, uint32_t esp)
 {
     if(ActiveInterruptManager != 0)
     {
@@ -88,10 +114,13 @@ uint32_t InterruptManger::handleInterrupt(uint8_t interruptNumber, uint32_t esp)
     return esp;
 }
 
-uint32_t InterruptManger::DoHandleInterrupt(uint8_t interruptNumber, uint32_t esp)
+uint32_t InterruptManager::DoHandleInterrupt(uint8_t interruptNumber, uint32_t esp)
 {
-    printf(" INTERRUPT");
-
+    if(interruptNumber != 0x20)
+    {
+        printf(" INTERRUPT");
+    }
+    
     if(0x20 <= interruptNumber && interruptNumber < 0x30)
     {
         picMasterCommand.Write(0x20);
