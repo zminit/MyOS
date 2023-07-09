@@ -24,7 +24,7 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
     uint8_t key = dataport.Read();
 
-    if(key < 0x80)
+     if(key < 0x80)
     {
         switch (key)
         {
@@ -34,13 +34,13 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
   
         default:
             char* foo = "KETBOARD 0x00 ";
-            char* hex = "123456789ABCDEF";
+            char* hex = "0123456789ABCDEF";
             foo[11] = hex[(key >> 4) & 0x0F];
             foo[12] = hex[key & 0x0F];
             printf(foo);
             break;
         }
-    }
+    } 
     
     
     return esp;
