@@ -13,6 +13,7 @@ public:
     KeyboardDriver(InterruptManager* manager);
     ~KeyboardDriver();
     virtual uint32_t HandleInterrupt(uint32_t esp);
+    uint8_t ScancodeToAsciicode(bool shift, uint8_t key);
 };
 
 
