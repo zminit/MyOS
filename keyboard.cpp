@@ -110,11 +110,12 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
             char* hex = "0123456789ABCDEF";
             foo[11] = hex[(key >> 4) & 0x0F];
             foo[12] = hex[key & 0x0F];
-            bool shift = false;
+            static bool shift = false;
             char asciicode = ScancodeToAsciicode(shift,key);
             if(asciicode == 0x10)
             {
                 scan_ = "shift!";
+                shift = !shift;
                 printf(scan_);
             }
             else if(asciicode == '\n')
