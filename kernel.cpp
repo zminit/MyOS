@@ -3,6 +3,7 @@
 #include "interrupts.h"
 #include "keyboard.h"
 #include "mouse.h"
+#include "driver.h"
 
 
 void printf(char* str)
@@ -44,6 +45,15 @@ void printf(char* str)
     
 }
 
+void printfHex(uint8_t key)
+{
+    char* foo = "00";
+    char* hex = "0123456789ABCDEF";
+    foo[0] = hex[(key >> 4) & 0x0F];
+    foo[1] = hex[key & 0x0F];
+    printf(foo);
+}
+
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
 extern "C" constructor end_ctors;
@@ -61,9 +71,13 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t magicnumber
     GlobalDescriptorTable gdt;
     InterruptManager interrutps(&gdt);
 
-    KeyboardDriver keyboard(&interrutps);
-    MouseDriver mouse(&interrutps);
+    DriverManager drvManager;
 
+    KeyboardDriver keyboard(&interrutps);
+        drvManager.AddDriver(&keyboard);
+    MouseDriver mouse(&interrutps);
+        drvManager.AddDriver(&mouse);
+    drvManager.ActivateAll();
     interrutps.Activate();
     while(1);
 }

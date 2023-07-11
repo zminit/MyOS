@@ -4,8 +4,13 @@ MouseDriver::MouseDriver(InterruptManager* manager)
 :InterruptHandler(0x2C,manager),
 dataport(0x60),
 commandport(0x64)
+{}
+
+MouseDriver::~MouseDriver(){}
+
+void MouseDriver::Activate()
 {
-    offset = 0;
+        offset = 0;
     buttons = 0;
 
     uint16_t* VideoMemory = (uint16_t*)0xb8000;
@@ -21,12 +26,8 @@ commandport(0x64)
 
     commandport.Write(0xD4);
     dataport.Write(0xF4);
-    dataport.Read();                         
+    dataport.Read();  
 }
-
-MouseDriver::~MouseDriver(){}
-
-void printf(char*);
 
 uint32_t MouseDriver::HandleInterrupt(uint32_t esp)
 {
@@ -59,15 +60,15 @@ uint32_t MouseDriver::HandleInterrupt(uint32_t esp)
                             | ((VideoMemory[80*y+x] & 0x00FF));
     }
 
-    for(uint8_t i = 0; i < 3; i++)
-    {
-        if((buffer[0] & (0x01 << i)) != (buttons & (0x01<<i)))
-        {
-            VideoMemory[80*y+x] = ((VideoMemory[80*y+x] & 0xF000) >> 4)
-                            | ((VideoMemory[80*y+x] & 0x0F00) << 4)
-                            | ((VideoMemory[80*y+x] & 0x00FF));
-        }
-    }
-    buttons = buffer[0];
+    // for(uint8_t i = 0; i < 3; i++)
+    // {
+    //     if((buffer[0] & (0x01 << i)) != (buttons & (0x01<<i)))
+    //     {
+    //         VideoMemory[80*y+x] = ((VideoMemory[80*y+x] & 0xF000) >> 4)
+    //                         | ((VideoMemory[80*y+x] & 0x0F00) << 4)
+    //                         | ((VideoMemory[80*y+x] & 0x00FF));
+    //     }
+    // }
+    // buttons = buffer[0];
     return esp;
 }
