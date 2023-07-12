@@ -1,10 +1,22 @@
 #include "keyboard.h"
 
-KeyboardDriver::KeyboardDriver(InterruptManager* manager)
+KeyboardEventHandler::KeyboardEventHandler()
+{}
+
+void KeyboardEventHandler::OnKeyDown(char)
+{}
+
+void KeyboardEventHandler::OnKeyUp(char)
+{}
+
+
+KeyboardDriver::KeyboardDriver(InterruptManager* manager, KeyboardEventHandler* handler)
 :InterruptHandler(0x21,manager),
 dataport(0x60),
 commandport(0x64)
-{}
+{
+    this->handler = handler;
+}
 
 KeyboardDriver::~KeyboardDriver(){}
 
@@ -24,7 +36,7 @@ void KeyboardDriver::Activate()
     dataport.Write(0xF4);
 }
 
-uint8_t KeyboardDriver::ScancodeToAsciicode(bool shift,uint8_t key)
+char KeyboardDriver::ScancodeToAsciicode(bool shift,uint8_t key)
 {
     switch (key)
     {
@@ -100,6 +112,9 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
 {
     uint8_t key = dataport.Read();
 
+    if(handler == 0)
+        return esp;
+
      if(key < 0x80)
     {
         switch (key)
@@ -109,34 +124,24 @@ uint32_t KeyboardDriver::HandleInterrupt(uint32_t esp)
         case 0xC5: break;
   
         default:
-            char* scan_ = " ";
             static bool shift = false;
             char asciicode = ScancodeToAsciicode(shift,key);
-            if(asciicode == 0x10)
-            {
-                scan_ = "shift!";
-                shift = !shift;
-                printf(scan_);
-            }
-            else if(asciicode == '\n')
-            {
-                scan_[0] = '\n';
-                printf(scan_);
-            } 
-            else if(asciicode >= 0x20)
-            {
-                scan_[0] = asciicode;
-                printf(scan_);
-            }
-            else
+            if(asciicode == 0)
             {
                 printf("KETBOARD 0x");
                 printfHex(key);
             }   
+            else if(asciicode == 0x10)
+            {
+                shift = !shift;
+            }
+            else
+            {
+                handler->OnKeyDown(asciicode);
+            }
             break;
         }
     } 
-    
     
     return esp;
 }
