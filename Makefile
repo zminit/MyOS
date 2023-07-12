@@ -2,11 +2,21 @@ GCCPARAMS = -m32 -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-excep
 ASPARAMS = --32
 LDPARAMS = -melf_i386
 
-objects = loader.o gdt.o driver.o port.o interruptstubs.o interrupts.o keyboard.o mouse.o kernel.o
+objects = obj/loader.o \
+		  obj/gdt.o \
+		  obj/drivers/driver.o \
+		  obj/hardwarecommunication/port.o \
+		  obj/hardwarecommunication/interruptstubs.o \ 
+		  obj/hardwarecommunication/interrupts.o \
+		  obj/drivers/keyboard.o \
+		  obj/drivers/mouse.o \
+		  obj/kernel.o 
 
 %.o: %.cpp
+	mkdir -p $(@D)
 	gcc $(GCCPARAMS) -c -o $@ $<
 %.o: %.s
+	mkdir -p $(@D)
 	as $(ASPARAMS) -o $@ $<
 
 mykernel.bin: linker.ld $(objects)
@@ -30,5 +40,6 @@ mykernel.iso: mykernel.bin
 	grub-mkrescue --output=$@ iso
 	rm -rf iso
 
+.PHONY: clean
 clean:
-	rm -rf mykernel.bin mykernel.iso $(objects)
+	rm -rf obj mykernel.bin mykernel.iso
