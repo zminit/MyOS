@@ -1,9 +1,13 @@
-#include "types.h"
-#include "gdt.h"
-#include "interrupts.h"
-#include "keyboard.h"
-#include "mouse.h"
-#include "driver.h"
+#include <common/types.h>
+#include <gdt.h>
+#include <hardwarecommunication/interrupts.h>
+#include <drivers/keyboard.h>
+#include <drivers/mouse.h>
+#include <drivers/driver.h>
+using namespace myos;
+using namespace myos::common;
+using namespace myos::hardwarecommunication;
+using namespace myos::drivers;
 
 
 void printf(char* str)
@@ -116,7 +120,7 @@ extern "C" void kernelMain(const void* multiboot_structure, uint32_t magicnumber
 {
     printf("hello world");
     GlobalDescriptorTable gdt;
-    InterruptManager interrutps(&gdt);
+    InterruptManager interrutps(0x20,&gdt);
 
     DriverManager drvManager;
 
