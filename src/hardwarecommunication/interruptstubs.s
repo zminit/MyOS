@@ -6,8 +6,8 @@
 
 
 .macro HandleException num
-.global _ZN4myos21hardwarecommunication16InterruptManager22HandleException\num\()Ev
-_ZN4myos21hardwarecommunication16InterruptManager22HandleException\num\()Ev:
+.global _ZN4myos21hardwarecommunication16InterruptManager19HandleException\num\()Ev
+_ZN4myos21hardwarecommunication16InterruptManager19HandleException\num\()Ev:
     movb $\num, (interruptnumber)
     jmp int_bottom
 .endm

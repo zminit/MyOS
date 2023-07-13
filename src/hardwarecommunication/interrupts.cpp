@@ -20,7 +20,6 @@ uint32_t InterruptHandler::HandleInterrupt(uint32_t esp)
 {
     return esp;
 }
-void InterruptManager::HandleException0x00(){}
 
 InterruptManager::GateDescriptor InterruptManager::interruptDescriptorTable[256];
 
